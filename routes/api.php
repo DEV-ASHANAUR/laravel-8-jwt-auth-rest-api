@@ -3,9 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TodoController;
 use App\Http\Controllers\PasswordResetRequestController;
 use App\Http\Controllers\ChangePasswordController;
+use App\Http\Controllers\TodoController;
+use App\Http\Controllers\StudentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +45,12 @@ Route::group([
     'middleware' => 'api'
 ],function($router){
     Route::resource('todos', TodoController::class);
+});
+
+//student
+
+Route::group([
+    'prefix'=>'student'
+],function($router){
+    Route::resource('info', StudentController::class);
 });

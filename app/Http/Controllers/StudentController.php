@@ -2,20 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Todo;
+use App\Models\Student;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class TodoController extends Controller
+class StudentController extends Controller
 {
-    public $user;
-
-    public function __construct()
-    {
-        $this->middleware('auth:api');
-        $this->user = $this->guard()->user();
-    }
     /**
      * Display a listing of the resource.
      *
@@ -23,8 +15,8 @@ class TodoController extends Controller
      */
     public function index()
     {
-        $todos = $this->user->todos()->get(['id', 'title', 'body', 'completed', 'created_by']);
-        return response()->json($todos->toArray());
+        $data = Student::all();
+        return response()->json($data->toArray());
     }
 
     /**
@@ -34,7 +26,7 @@ class TodoController extends Controller
      */
     public function create()
     {
-
+        //
     }
 
     /**
@@ -46,9 +38,11 @@ class TodoController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(),[
-            'title' => 'required|string',
-            'body' => 'required|string',
-            'completed' => 'required|string'
+            'name' => 'required|between:3,100',
+            'email' => 'required|email|unique:students',
+            'roll' => 'required',
+            'address' => 'required'
+
         ]);
         if($validate->fails()){
             return response()->json([
@@ -56,21 +50,22 @@ class TodoController extends Controller
                 'errors' => $validate->errors(),
             ],400);
         }
-        $todo = new Todo();
-        $todo->title = $request->title;
-        $todo->body = $request->body;
-        $todo->completed = $request->completed;
+        $data = new Student();
+        $data->name = $request->name;
+        $data->email = $request->email;
+        $data->roll = $request->roll;
+        $data->address = $request->address;
 
-        if($this->user->todos()->save($todo)){
+        if($data->save()){
             return response()->json([
                 'status' => true,
-                'todo' => $todo,
+                'data' => $data,
             ]);
         }else{
             return response()->json(
                 [
                     'status'  => false,
-                    'message' => 'Oops, the todo could not be saved.',
+                    'message' => 'Oops, the todo could not be student info.',
                 ]
             );
 
@@ -80,21 +75,22 @@ class TodoController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Todo  $todo
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Todo $todo)
+    public function show($id)
     {
-        //
+        $data = Student::findOrFail($id);
+        return response()->json($data->toArray());
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Todo  $todo
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Todo $todo)
+    public function edit($id)
     {
         //
     }
@@ -103,15 +99,18 @@ class TodoController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Todo  $todo
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Todo $todo)
+    public function update(Request $request, $id)
     {
+        // return $id;
         $validate = Validator::make($request->all(),[
-            'title' => 'required|string',
-            'body' => 'required|string',
-            'completed' => 'required|string'
+            'name' => 'required|between:3,100',
+            'email' => 'required|email',
+            'roll' => 'required',
+            'address' => 'required'
+
         ]);
         if($validate->fails()){
             return response()->json([
@@ -119,20 +118,22 @@ class TodoController extends Controller
                 'errors' => $validate->errors(),
             ],400);
         }
-        $todo->title = $request->title;
-        $todo->body = $request->body;
-        $todo->completed = $request->completed;
+        $student = Student::find($id);
+        $student->name = $request->name;
+        $student->email = $request->email;
+        $student->roll = $request->roll;
+        $student->address = $request->address;
 
-        if($this->user->todos()->save($todo)){
+        if($student->save()){
             return response()->json([
                 'status' => true,
-                'todo' => $todo,
+                'data' => $student,
             ]);
         }else{
             return response()->json(
                 [
                     'status'  => false,
-                    'message' => 'Oops, the todo could not be saved.',
+                    'message' => 'Oops, the todo could not be student info.',
                 ]
             );
 
@@ -142,27 +143,25 @@ class TodoController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Todo  $todo
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Todo $todo)
+    public function destroy($id)
     {
-        if($todo->delete()){
+        $data = Student::findOrFail($id);
+        if($data->delete()){
             return response()->json([
                 'status' => true,
                 'message' => 'Data deleted Successfully',
-                'todo' =>$todo
+                'data' =>$data
             ]);
         }else{
             return response()->json(
                 [
                     'status'  => false,
-                    'message' => 'Oops, the todo could not be deleted.',
+                    'message' => 'Oops, the data could not be deleted.',
                 ]
             );
         }
-    }
-    protected function guard(){
-        return Auth::guard();
     }
 }
